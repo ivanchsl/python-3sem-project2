@@ -11,7 +11,16 @@ help_text = ("Бот обращается к нейросети Kandinsky для
              "соответствующий пункт на виртуальной клавиатуре.")
 
 
-def getWaitText(num):
+def getWaitText(num: int) -> str:
+    """
+    Returns appropriate waiting message text based on iteration number.
+    
+    Args:
+        num: Current iteration number in waiting loop
+        
+    Returns:
+        str: Waiting message text to show
+    """
     if num == 0:
         return "Ожидайте, изображение генерируется..."
     return choice(wait_texts)
