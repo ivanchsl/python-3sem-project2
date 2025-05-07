@@ -1,26 +1,19 @@
 import asyncio
-from aiogram import Bot, Dispatcher, Router, F, types
+from aiogram import Router, F, types
 from aiogram.types import BufferedInputFile
 from aiogram.filters import Command, StateFilter, or_f
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
-from aiogram_sqlite_storage.sqlitestore import SQLStorage
-import logging
 import base64
 
 
-import kandinsky
 import config
+import kandinsky
 import keyboards
 import texts
 
 
-logging.basicConfig(level=logging.INFO)
-bot = Bot(token=config.BOT_API)
-storage = SQLStorage("fsm_storage.db")
-dp = Dispatcher(storage=storage)
 router = Router()
-dp.include_router(router)
 
 
 class States(StatesGroup):
@@ -172,6 +165,3 @@ async def start(message: types.Message):
         message: Incoming message triggering the command
     """
     await message.answer("Привет!", reply_markup=keyboards.start_kb)
-
-
-dp.run_polling(bot)
