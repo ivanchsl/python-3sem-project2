@@ -1,6 +1,7 @@
 from random import choice
 
 
+start_generation_text = "Ожидайте, изображение генерируется..."
 wait_texts = ["Ещё немного...", "Осталось совсем чуть-чуть...", "Минуточку терпения..."]
 help_text = ("Бот обращается к нейросети Kandinsky для генерации изображения "
              "по заданному запросу. Для ввода запроса можно воспользоваться "
@@ -22,5 +23,5 @@ def getWaitText(num: int) -> str:
         str: Waiting message text to show
     """
     if num == 0:
-        return "Ожидайте, изображение генерируется..."
+        return start_generation_text
     return choice(wait_texts)

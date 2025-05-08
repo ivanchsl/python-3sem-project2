@@ -16,12 +16,13 @@
 `https://fusionbrain.ai/editor`
 
 ## Запуск
-Для Windows:
-
-```run.bat```
-
-Для Linux:
 
 ```run.sh```
 
-Или перейдите в папку `src` и запустите `main.py` с использованием Вашего интерпретатора Python.
+Или:
+
+```PYTHONPATH=src python src/main.py```
+
+## Запуск тестов
+
+```PYTHONPATH=src python -m pytest --cov src --cov-report term-missing tests```
