@@ -1,28 +1,63 @@
-Телеграм-бот с обращением к нейросети Kandinsky для генерации изображения.
+# Телеграм-бот для генерации изображений с помощью нейросети Kandinsky
 
-Перед первым запуском убедитесь, что установлены необходимые библиотеки Python:
+Этот проект реализует Телеграм-бота, который принимает от пользователя текстовые запросы и отправляет их в нейросеть Kandinsky для генерации изображений.
 
-```pip install -r requirements.txt```
+---
+
+## Установка зависимостей
+
+Перед первым запуском убедитесь, что установлены необходимые библиотеки для Python версии не ниже 3.8:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
 
 ## Получение ключей API
-Перед использованием необходимо получить ключи API для телеграм-бота и для нейросети, и разместить их в файле `src/config.py`.
 
-Телеграм-бот:
+Для работы бота понадобятся два ключа:
 
-`https://t.me/BotFather`
+1. **Телеграм-бот**
+   Создайте бота через [`@BotFather`](https://t.me/BotFather) и получите `BOT_API`.
 
-Нейросеть:
+2. **Нейросеть Kandinsky**
+   Зарегистрируйтесь на [https://fusionbrain.ai/editor](https://fusionbrain.ai/editor) и получите `KANDINSKY_API_KEY` и `KANDINSKY_SECRET_KEY`.
 
-`https://fusionbrain.ai/editor`
+### Файл `.env`
 
-## Запуск
+В корне проекта создайте файл `.env` со следующим содержимым (без угловых скобок):
 
-```run.sh```
+```dotenv
+BOT_API=<ваш_телеграм_token>
+KANDINSKY_API_KEY=<ваш_api_key>
+KANDINSKY_SECRET_KEY=<ваш_secret_key>
+```
 
-Или:
+Не забудьте добавить `.env` в ваш `.gitignore`, чтобы ключи не попали в репозиторий.
 
-```PYTHONPATH=src python src/main.py```
+---
 
-## Запуск тестов
+## Запуск бота
 
-```PYTHONPATH=src python -m pytest --cov src --cov-report term-missing tests```
+* Через скрипт оболочки:
+
+```bash
+./run.sh
+```
+
+* Или напрямую:
+
+```bash
+PYTHONPATH=src python src/main.py
+```
+
+---
+
+## Тестирование
+
+Для запуска тестов используйте `pytest`:
+
+```bash
+PYTHONPATH=src python -m pytest --cov src --cov-report term-missing tests
+```
