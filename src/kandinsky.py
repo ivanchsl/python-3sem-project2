@@ -1,46 +1,14 @@
 import json
+import base64
 import aiohttp
 from types import TracebackType
 from typing import Any, Dict, List, Optional, Type, Union
 
 
-class APIError(Exception):
-    """
-    Base exception for API errors
-    """
+from api_interface import *
 
 
-class IncorrectUseError(APIError):
-    """
-    Exception if the API is used incorrectly
-    """
-
-
-class WrongParametersError(APIError):
-    """
-    Exception if user gave wrong parameters
-    """
-
-
-class FailedRequestError(APIError):
-    """
-    Exception if request status is incorrect
-    """
-
-
-class WrongResponseBodyError(APIError):
-    """
-    Exception if request body is unexpected
-    """
-
-
-class ImageGenerationError(APIError):
-    """
-    Exception if server did not generate an image
-    """
-
-
-class API:
+class API(APIInterface):
     """
     Asynchronous client for interacting with the FusionBrain (Kandinsky) API.
     
@@ -65,12 +33,6 @@ class API:
         self.session_closing: bool = False
         self.pending_images: List[Optional[str]] = []
         self.ready_images: List[str] = []
-
-    async def __aenter__(self):
-        """
-        Asynchronous context manager entry point.
-        """
-        return self
 
     async def __aexit__(
         self,
@@ -285,24 +247,13 @@ class API:
                 result_images = result_dict.get("files", None)
                 if not isinstance(result_images, list) or len(result_images) < 1:
                     raise WrongResponseBodyError("Success response does not contain any images")
-                self.ready_images.append(result_images[0])
+                self.ready_images.append(base64.b64decode(result_images[0]))
                 self.pending_images[index] = None
             elif image_status == "FAIL":
                 raise ImageGenerationError("Server failure")
             else:
                 raise WrongResponseBodyError("Unexpected generation status")
         self.pending_images = list(filter(lambda x: x is not None, self.pending_images))
-
-    def getPhotos(self) -> List[str]:
-        """
-        Retrieve and clear the list of generated images.
-        
-        Returns:
-            list[str]: List of generated images
-        """
-        images = self.ready_images
-        self.ready_images = []
-        return images
 
     async def _getStyles(self) -> List[Dict[str, str]]:
         """
@@ -324,35 +275,3 @@ class API:
             } for elem in data]
         except KeyError as e:
             raise WrongResponseBodyError("Style is not properly named") from e
-
-    async def getStyleList(self):
-        """
-        Get the list of available style titles.
-        
-        Returns:
-            list[str]: List of available style titles
-        """
-        data = await self._getStyles()
-        return list(map(lambda x : x["title"], data))
-
-    async def getStyleByTitle(
-        self,
-        title: str
-    ) -> str:
-        """
-        Get a style display name by its title.
-        
-        Args:
-            title: Style title to look up
-            
-        Returns:
-            str: Style display name
-            
-        Raises:
-            WrongParametersError: If style is not found
-        """
-        data = await self._getStyles()
-        for elem in data:
-            if elem["title"] == title:
-                return elem["display_name"]
-        raise WrongParametersError("Incorrect style")

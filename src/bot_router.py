@@ -61,22 +61,24 @@ async def executePrompt(
     style_title = data.get("style_title", "DEFAULT")
     style = data.get("style", "DEFAULT")
     await message.answer(f"Изображение генерируется стилем {style_title}.", reply_markup=keyboards.empty_kb)
-    async with kandinsky.API(config.KANDINSKY_API_KEY, config.KANDINSKY_SECRET_KEY) as api:
-        await api.startGeneration(message.text.strip(), style)
-        for i in range(15):
-            await api.checkGeneration()
-            result = api.getPhotos()
-            if result:
-                for item in result:
-                    photo = base64.b64decode(item)
-                    await message.answer_photo(photo=BufferedInputFile(
-                        file=photo,
-                        filename="generated_image.png"
-                    ), reply_markup=keyboards.start_kb)
-                return
-            await asyncio.sleep(4)
-            await message.answer(texts.getWaitText(i), reply_markup=keyboards.empty_kb)
-    await message.answer("Превышено максимальное время ожидания генерации.", reply_markup=keyboards.start_kb)
+    try:
+        async with kandinsky.API(config.KANDINSKY_API_KEY, config.KANDINSKY_SECRET_KEY) as api:
+            await api.startGeneration(message.text.strip(), style)
+            for i in range(15):
+                await api.checkGeneration()
+                result = api.getPhotos()
+                if result:
+                    for photo in result:
+                        await message.answer_photo(photo=BufferedInputFile(
+                            file=photo,
+                            filename="generated_image.png"
+                        ), reply_markup=keyboards.start_kb)
+                    return
+                await asyncio.sleep(4)
+                await message.answer(texts.getWaitText(i), reply_markup=keyboards.empty_kb)
+        await message.answer("Превышено максимальное время ожидания генерации.", reply_markup=keyboards.start_kb)
+    except Exception as e:
+        await message.answer("Ошибка генерации изображения.", reply_markup=keyboards.start_kb)
 
 
 @router.message(StateFilter(States.INPUT_STYLE))
@@ -92,8 +94,11 @@ async def applyStyle(
         state: Current finite state machine context
     """
     await state.set_state(None)
-    async with kandinsky.API() as api:
-        style = await api.getStyleByTitle(message.text)
+    try:
+        async with kandinsky.API() as api:
+            style = await api.getStyleByTitle(message.text)
+    except Exception as e:
+        await message.answer("Ошибка выбора стиля.", reply_markup=keyboards.start_kb)
     if style is None:
         await message.answer("Неверный стиль.", reply_markup=keyboards.start_kb)
         return
